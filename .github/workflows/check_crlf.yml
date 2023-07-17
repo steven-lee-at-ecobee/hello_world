@@ -1,0 +1,18 @@
+name: Check CRLF
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  check_crlf:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Check CRLF line endings
+        run: |
+          git ls-files -z | xargs -0 file -i | grep -P 'text/plain.*\bcharset=binary\b' | cut -d ':' -f 1 | xargs -I {} sh -c 'git show :{} | grep -U --color=always $'"\r"' && echo "CRLF found in {}" && exit 1 || exit 0'
